@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b13">
+<title>MotionText Studio</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MotionText">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Audio-reactive lyric video studio with AI transcription">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">✦ MotionText <span>Studio</span> <small>v1.2</small></div>
+  <div class="top-actions">
+    <button id="undoBtn" title="Ctrl+Z" data-i18n-title="undo" disabled>↶</button>
+    <button id="redoBtn" title="Ctrl+Shift+Z" data-i18n-title="redo" disabled>↷</button>
+    <button id="saveProject" data-i18n="saveProject">Hifadhi mradi</button>
+    <label class="btnlike" for="openProject" data-i18n="openProject">Fungua mradi</label>
+    <input id="openProject" type="file" accept=".json,application/json" hidden>
+    <button id="demoBtn" data-i18n="demo">Demo</button>
+    <button id="installBtn" class="primary" hidden data-i18n="install">⬇ Sakinisha app</button>
+    <button id="langBtn" aria-label="Language">EN</button>
+  </div>
+</header>
+
+<main>
+<aside class="panel">
+  <div class="section">
+    <h2 data-i18n="s1">01 · Audio</h2>
+    <label class="filebox" id="dropzone" for="audioFile">
+      <div data-i18n="drop">Buruta audio hapa au bonyeza kuchagua</div>
+      <small>MP3 · WAV · M4A · OGG · FLAC</small>
+    </label>
+    <input id="audioFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.opus" hidden>
+    <div class="file-name" id="fileName" data-i18n="noAudio">Hakuna audio</div>
+    <audio id="audio" controls preload="metadata"></audio>
+    <div class="hint" data-i18n="localHint">Uchambuzi wa audio unafanyika ndani ya browser yako.</div>
+  </div>
+
+  <div class="section">
+    <h2 data-i18n="s2">02 · Maneno / Captions</h2>
+    <label for="bulkLyrics" data-i18n="pasteLyrics">Bandika maneno (mstari mmoja = caption moja)</label>
+    <textarea id="bulkLyrics" rows="5" data-i18n-ph="lyricsPh"></textarea>
+    <div class="row wrap">
+      <button id="tapSync" class="primary" data-i18n="tapSync">⏱ Tap-Sync</button>
+      <button id="splitLyrics" data-i18n="autoSplit">Gawanya kiotomatiki</button>
+    </div>
+    <div class="hint" data-i18n="tapHint">Tap-Sync: cheza wimbo, bonyeza kitufe (au T) mwanzo wa kila mstari. Njia sahihi zaidi bila AI.</div>
+
+    <label for="newCaption" data-i18n="quickAdd">Ongeza caption moja</label>
+    <textarea id="newCaption" rows="2"></textarea>
+    <div class="row">
+      <input id="newStart" type="number" min="0" step=".1" value="0" aria-label="Start">
+      <input id="newEnd" type="number" min=".1" step=".1" value="3" aria-label="End">
+      <button class="primary" id="addCaption">＋</button>
+    </div>
+
+    <label for="captionFile" data-i18n="importCaps">Leta captions (.srt / .vtt)</label>
+    <input id="captionFile" type="file" accept=".srt,.vtt,.lrc,text/vtt,application/x-subrip">
+    <div class="row wrap tight">
+      <button id="exportSrt">SRT</button><button id="exportVtt">VTT</button><button id="exportLrc">LRC</button><button id="exportTtml">TTML</button>
+    </div>
+    <div class="status" id="captionStatus" aria-live="polite"></div>
+  </div>
+
+  <div class="section">
+    <h2 data-i18n="s3">03 · AI Transcription</h2>
+    <div class="status" id="providerStatus"></div>
+    <label for="transcriptLanguage" data-i18n="language">Lugha ya wimbo</label>
+    <select id="transcriptLanguage">
+      <option value="" data-i18n="autoDetect">Tambua kiotomatiki</option>
+      <option value="sw">Kiswahili</option><option value="en">English</option><option value="fr">Français</option>
+      <option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option><option value="hi">हिन्दी</option>
+    </select>
+    <label for="sttPrompt" data-i18n="sttPrompt">Maelezo ya kusaidia usahihi (majina, maneno magumu)</label>
+    <input id="sttPrompt" type="text" maxlength="400" placeholder="mf. Bongo Flava, Diamond, Nairobi">
+    <label class="toggle"><input type="checkbox" id="wordStamps" checked> <span data-i18n="wordStamps">Muda wa kila neno (karaoke)</span></label>
+
+    <div class="trim">
+      <label data-i18n="trim">Kata sehemu ya kutranscribe</label>
+      <div class="row">
+        <input id="trimStart" type="number" min="0" step=".1" value="0" aria-label="Trim start (s)">
+        <input id="trimEnd" type="number" min="0" step=".1" value="0" aria-label="Trim end (s)">
+      </div>
+      <div class="row wrap tight">
+        <button id="trimSetStart" data-i18n="trimSetStart">⇤ Mwanzo = sasa</button>
+        <button id="trimSetEnd" data-i18n="trimSetEnd">⇥ Mwisho = sasa</button>
+        <button id="trimReset" data-i18n="trimReset">Wimbo mzima</button>
+      </div>
+      <div class="status" id="trimInfo"></div>
+    </div>
+    <details id="keysBox">
+      <summary data-i18n="ownKeys">Tumia API key yangu (hiari)</summary>
+      <label for="groqKey">Groq API key</label><input id="groqKey" type="password" placeholder="gsk_…" autocomplete="off" spellcheck="false">
+      <label for="openaiKey">OpenAI API key</label><input id="openaiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false">
+      <label id="tokenRow" class="hidden" for="accessToken">Access token</label><input id="accessToken" class="hidden" type="password" autocomplete="off">
+      <label class="toggle"><input type="checkbox" id="rememberKeys"> <span data-i18n="remember">Kumbuka kwenye kifaa hiki (si salama kwenye kifaa cha pamoja)</span></label>
+      <div class="hint" data-i18n="keysHint">Kwa chaguo-msingi keys hukaa kwenye kipindi hiki tu (sessionStorage). Njia salama zaidi: ziweke kwenye .env ya server.</div>
+    </details>
+
+    <div class="row" style="margin-top:10px">
+      <button class="primary grow" id="transcribeBtn" data-i18n="transcribe">✨ Transcribe</button>
+      <button id="cancelTranscribe" hidden data-i18n="cancel">Ghairi</button>
+    </div>
+    <div class="meter"><div id="transcriptionMeter"></div></div>
+    <div class="status" id="transcriptionStatus" aria-live="polite"></div>
+  </div>
+</aside>
+
+<section class="center">
+  <div class="stage-wrap">
+    <div class="stage-top">
+      <select id="format" aria-label="Format">
+        <option value="9:16">9:16 · 720×1280</option>
+        <option value="9:16hd">9:16 · 1080×1920</option>
+        <option value="1:1">1:1 · 1080×1080</option>
+        <option value="16:9">16:9 · 1280×720</option>
+      </select>
+      <span id="previewMode"></span>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="preview" width="720" height="1280"></canvas>
+      <div class="tap-overlay" id="tapOverlay" hidden>
+        <div class="tap-prev" id="tapPrev"></div>
+        <div class="tap-cur" id="tapCur"></div>
+        <div class="tap-next" id="tapNext"></div>
+        <button class="primary tap-btn" id="tapBtn">TAP</button>
+        <button id="tapCancel" data-i18n="cancel">Ghairi</button>
+      </div>
+    </div>
+    <div class="transport">
+      <button class="primary" id="playBtn">▶</button>
+      <button id="restartBtn" title="Restart">↺</button>
+      <button id="fullscreenBtn" title="Fullscreen">⛶</button>
+      <span class="time" id="clock">00:00 / 00:00</span>
+    </div>
+    <div class="meter"><div id="audioMeter"></div></div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-head">
+      <h2 data-i18n="timeline">TIMELINE</h2>
+      <div class="row tight">
+        <button id="zoomOut" aria-label="Zoom out">−</button>
+        <button id="zoomFit" data-i18n="fit">Fit</button>
+        <button id="zoomIn" aria-label="Zoom in">＋</button>
+      </div>
+    </div>
+    <canvas id="tl" height="130" aria-label="Timeline"></canvas>
+    <div class="hint" data-i18n="tlHint">Buruta kingo za caption kubadili muda, buruta katikati kuhamisha, bonyeza kuruka. Ctrl+gurudumu = zoom.</div>
+    <div class="timeline-head" style="margin-top:12px">
+      <h2 data-i18n="captions">CAPTIONS</h2>
+      <button id="clearBtn" data-i18n="clearAll">Futa zote</button>
+    </div>
+    <div class="clip-list" id="clipList"></div>
+  </div>
+</section>
+
+<aside class="panel right-panel">
+  <div class="section">
+    <h2 data-i18n="s4">04 · Mitindo</h2>
+    <div class="preset-grid" id="presets">
+      <button data-preset="neon" class="active">Neon Pulse</button>
+      <button data-preset="cinema">Cinematic</button>
+      <button data-preset="gradient">Color Flow</button>
+      <button data-preset="minimal">Minimal</button>
+      <button data-preset="wave">Waveform</button>
+      <button data-preset="party">Beat Flash</button>
+      <button data-preset="bars">Spectrum</button>
+    </div>
+  </div>
+  <div class="section">
+    <h2 data-i18n="s5">05 · Mandharinyuma</h2>
+    <div class="colorline"><label for="colorA">A</label><input id="colorA" data-style="colorA" type="color"><label for="colorB">B</label><input id="colorB" data-style="colorB" type="color"></div>
+    <label><span data-i18n="sens">Ukali wa beat</span> <b id="sensitivityVal"></b></label>
+    <input id="sensitivity" data-style="sensitivity" type="range" min=".7" max="2.8" step=".05">
+    <label data-i18n="motion">Mwendo</label><input id="motion" data-style="motion" type="range" min="0" max="100">
+    <label data-i18n="flash">Nguvu ya flash</label><input id="flash" data-style="flash" type="range" min="0" max="100">
+    <label class="toggle"><input type="checkbox" id="reactive" data-style="reactive"> <span data-i18n="reactive">Jibu bass / beat</span></label>
+    <label class="toggle"><input type="checkbox" id="autoHue" data-style="autoHue"> <span data-i18n="autoHue">Badilisha rangi na nguvu ya muziki</span></label>
+  </div>
+  <div class="section">
+    <h2 data-i18n="s6">06 · Maandishi</h2>
+    <label for="font" data-i18n="font">Fonti</label>
+    <select id="font" data-style="font"><option>Arial</option><option>Georgia</option><option>Impact</option><option>Trebuchet MS</option><option>Courier New</option><option>system-ui</option></select>
+    <label><span data-i18n="size">Ukubwa</span> <b id="sizeVal"></b></label>
+    <input id="fontSize" data-style="size" type="range" min="24" max="110">
+    <div class="colorline"><label for="textColor" data-i18n="textColor">Maandishi</label><input id="textColor" data-style="textColor" type="color"><label for="accentColor">Accent</label><input id="accentColor" data-style="accent" type="color"></div>
+    <label for="position" data-i18n="position">Nafasi</label>
+    <select id="position" data-style="position"><option value="bottom" data-i18n="bottom">Chini</option><option value="center" data-i18n="center">Katikati</option><option value="top" data-i18n="top">Juu</option></select>
+    <label for="textAnimation" data-i18n="anim">Animation</label>
+    <select id="textAnimation" data-style="animation"><option value="pop">Pop</option><option value="rise">Rise</option><option value="type">Typewriter</option><option value="fade">Fade</option><option value="glitch">Glitch</option></select>
+    <label class="toggle"><input type="checkbox" id="karaoke" data-style="karaoke"> <span data-i18n="karaoke">Karaoke (neno kwa neno)</span></label>
+    <label class="toggle"><input type="checkbox" id="outline" data-style="outline"> <span data-i18n="outline">Mstari wa nje (outline)</span></label>
+  </div>
+  <div class="section">
+    <h2 data-i18n="s7">07 · Export</h2>
+    <button class="primary" style="width:100%" id="exportBtn" data-i18n="exportVideo">⬇ Toa video</button>
+    <label class="toggle"><input type="checkbox" id="muteExport"> <span data-i18n="muteExport">Nyamazisha sauti wakati wa export</span></label>
+    <div class="meter"><div id="exportMeter"></div></div>
+    <div class="status" id="recordStatus" aria-live="polite"></div>
+    <a id="dlLast" class="btnlike hidden" download>⬇</a>
+    <div class="hint" data-i18n="exportHint">Inarekodi canvas + sauti kwa muda halisi. Weka tab wazi hadi iishe. MP4 ikiungwa mkono na browser, vinginevyo WebM.</div>
+  </div>
+</aside>
+</main>
+
+<footer>
+  <span data-i18n="shortcuts">Njia za mkato: Space cheza/simamisha · ←/→ ±5s (Shift ±1s) · S gawanya · T tap · [ ] weka mwanzo/mwisho · Delete futa · Ctrl+Z / Ctrl+Shift+Z</span>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
