@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MotionText Studio",
+  "short_name": "MotionText",
+  "description": "Pakia wimbo, pata maneno kwa AI au Tap-Sync, na toa video ya lyrics inayojibu muziki.",
+  "lang": "sw",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090b13",
+  "theme_color": "#090b13",
+  "categories": ["music", "multimedia", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
