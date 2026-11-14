@@ -1,13 +1,13 @@
 {
   "name": "motiontext-studio",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Audio-reactive lyric/caption video studio with AI transcription (Groq → OpenAI fallback). Zero dependencies.",
   "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check server.js && node --check lib/api.js && node --check lib/transcribe.js && node --check public/app.js"
+    "check": "node --check server.js && node --check lib/api.js && node --check lib/transcribe.js && node --check lib/images.js && node --check public/app.js"
   },
   "engines": {
     "node": ">=20"
