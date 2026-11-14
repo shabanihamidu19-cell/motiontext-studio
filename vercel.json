@@ -10,6 +10,12 @@
     },
     "api/selftest.js": {
       "maxDuration": 30
+    },
+    "api/image.js": {
+      "maxDuration": 30
+    },
+    "api/artist-search.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
