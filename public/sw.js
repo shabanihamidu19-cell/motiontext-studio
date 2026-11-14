@@ -4,7 +4,7 @@
  * - Stale-while-revalidate for same-origin GET files.
  * - NEVER touches /api/* (transcription always goes to the network).
  * Bump VERSION on every release (a test checks it matches package.json). */
-const VERSION = 'mts-v1.2.0';
+const VERSION = 'mts-v1.3.0';
 const SHELL = ['/', '/style.css', '/app.js', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
